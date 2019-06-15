@@ -181,6 +181,17 @@ void writeHeader()
 #endif
 
 #if defined(PCBTARANIS) || defined(PCBHORUS)
+  for (uint8_t i=1; i<NUM_STICKS+1; i++) {
+    const char * p = STR_VSRCRAW + i * STR_VSRCRAW[0] + 2;
+    f_puts("Raw ", &g_oLogFile);
+    for (uint8_t j=0; j<STR_VSRCRAW[0]-1; ++j) {
+      if (!*p) break;
+      f_putc(*p, &g_oLogFile);
+      ++p;
+    }
+    f_putc(',', &g_oLogFile);
+  }
+
   for (uint8_t i=1; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS+1; i++) {
     const char * p = STR_VSRCRAW + i * STR_VSRCRAW[0] + 2;
     for (uint8_t j=0; j<STR_VSRCRAW[0]-1; ++j) {
@@ -341,6 +352,10 @@ void logsWrite()
       }
 #endif
 #endif
+
+      for (uint8_t i=0; i<NUM_STICKS; i++) {
+        f_printf(&g_oLogFile, "0x%04x,", anaIn(i));
+      }
 
       for (uint8_t i=0; i<NUM_STICKS+NUM_POTS+NUM_SLIDERS; i++) {
         f_printf(&g_oLogFile, "%d,", calibratedAnalogs[i]);
