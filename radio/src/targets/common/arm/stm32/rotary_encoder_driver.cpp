@@ -2,7 +2,7 @@
  * Copyright (C) OpenTX
  *
  * Based on code named
- *   th9x - http://code.google.com/p/th9x 
+ *   th9x - http://code.google.com/p/th9x
  *   er9x - http://code.google.com/p/er9x
  *   gruvin9x - http://code.google.com/p/gruvin9x
  *
@@ -70,7 +70,7 @@ void rotaryEncoderInit()
 
 void rotaryEncoderCheck()
 {
-  uint8_t newPosition = ROTARY_ENCODER_POSITION();
+  /*uint8_t newPosition = ROTARY_ENCODER_POSITION();
   if (newPosition != rotencPosition && !keyState(KEY_ENTER)) {
     if ((rotencPosition & 0x01) ^ ((newPosition & 0x02) >> 1)) {
       --rotencValue;
@@ -78,7 +78,28 @@ void rotaryEncoderCheck()
     else {
       ++rotencValue;
     }
-    rotencPosition = newPosition;
+    rotencPosition = newPosition;*/
+
+  static uint8_t  state = 0;
+  uint32_t pins = ROTARY_ENCODER_POSITION();
+
+  if (pins != (state & 0x03) && !keyState(KEY_ENTER)) {
+    if ((pins & 0x01) ^ ((pins & 0x02) >> 1)) {
+      if ((state & 0x03) == 3)
+        ++rotencValue;
+      else
+        --rotencValue;
+    }
+    else
+    {
+      if ((state & 0x03) == 3)
+        --rotencValue;
+      else if ((state & 0x03) == 0)
+        ++rotencValue;
+    }
+    state &= ~0x03 ;
+    state |= pins ;
+
 #if !defined(BOOT)
     if (g_eeGeneral.backlightMode & e_backlight_mode_keys) {
       backlightOn();
