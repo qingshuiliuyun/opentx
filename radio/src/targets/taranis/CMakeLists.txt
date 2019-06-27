@@ -6,6 +6,8 @@ option(PXX1 "PXX1 protocol support" ON)
 option(PXX2 "PXX2 protocol support" OFF)
 option(AUTOUPDATE "Auto update internal chips from SD" OFF)
 
+add_definitions(-DPCBFRSKY)
+
 if(PCB STREQUAL X9E)
   set(PWR_BUTTON "PRESS" CACHE STRING "Pwr button type (PRESS/SWITCH)")
   set(STICKS "STANDARD" CACHE STRING "Sticks type (STANDARD/HORUS)")

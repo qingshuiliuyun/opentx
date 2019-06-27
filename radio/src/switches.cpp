@@ -22,7 +22,7 @@
 
 #define CS_LAST_VALUE_INIT -32768
 
-#if defined(PCBHORUS)
+#if defined(COLORLCD)
   #define SWITCH_WARNING_LIST_X        WARNING_LINE_X
   #define SWITCH_WARNING_LIST_Y        WARNING_LINE_Y+3*FH
 #elif LCD_W >= 212
@@ -56,7 +56,7 @@ LogicalSwitchesFlightModeContext lswFm[MAX_FLIGHT_MODES];
 #define LS_LAST_VALUE(fm, idx) lswFm[fm].lsw[idx].lastValue
 
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY) || defined(PCBFLYSKY)
 #if defined(PCBX9E)
 tmr10ms_t switchesMidposStart[16];
 #else
@@ -436,7 +436,7 @@ bool getSwitch(swsrc_t swtch, uint8_t flags)
   }
 #endif
   else if (cs_idx <= SWSRC_LAST_SWITCH) {
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
     if (flags & GETSWITCH_MIDPOS_DELAY)
       result = SWITCH_POSITION(cs_idx-SWSRC_FIRST_SWITCH);
     else
@@ -507,7 +507,7 @@ swsrc_t getMovedSwitch()
   static tmr10ms_t s_move_last_time = 0;
   swsrc_t result = 0;
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
   for (int i=0; i<NUM_SWITCHES; i++) {
     if (SWITCH_EXISTS(i)) {
       swarnstate_t mask = ((swarnstate_t)0x03 << (i*2));
@@ -553,7 +553,7 @@ void checkSwitches()
   swarnstate_t last_bad_switches = 0xff;
   swarnstate_t states = g_model.switchWarningState;
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY) || defined(PCBFLYSKY)
   uint8_t bad_pots = 0, last_bad_pots = 0xff;
 #endif
 
@@ -563,7 +563,7 @@ void checkSwitches()
 
   while (1) {
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
   #define GETADC_COUNT 1
 #endif
 
@@ -644,7 +644,7 @@ void checkSwitches()
     backlightOn();
 
     // first - display warning
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY) || defined(PCBFLYSKY)
     if (last_bad_switches != switches_states || last_bad_pots != bad_pots) {
       drawAlertBox(STR_SWITCHWARN, nullptr, STR_PRESSANYKEYTOSKIP);
       if (last_bad_switches == 0xff || last_bad_pots == 0xff) {

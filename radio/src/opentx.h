@@ -30,6 +30,14 @@
 #include "opentx_types.h"
 #include "debounce.h"
 
+#include "opentx_helpers.h"
+#include "touch.h"
+#include "bitfield.h"
+
+#if defined(LIBOPENUI)
+#include "libopenui.h"
+#endif
+
 #if defined(STM32)
 #include "usbd_conf.h"
 #endif
@@ -238,7 +246,7 @@
 
 #include "debug.h"
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
   #define SWSRC_THR                    SWSRC_SB2
   #define SWSRC_GEA                    SWSRC_SG2
   #define SWSRC_ID0                    SWSRC_SA0
@@ -364,6 +372,7 @@ extern const uint8_t modn12x3[];
 #endif
 
 extern uint8_t channel_order(uint8_t x);
+extern uint8_t channel_order(uint8_t setup, uint8_t x);
 
 #define THRCHK_DEADBAND                16
 
@@ -440,7 +449,7 @@ bool cmpStrWithZchar(const char * charString, const char * zcharString, int size
 #include "keys.h"
 #include "pwr.h"
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY) || defined(PCBNV14)
 div_t switchInfo(int switchPosition);
 extern uint8_t potsPos[NUM_XPOTS];
 #endif
@@ -453,6 +462,16 @@ uint16_t evalChkSum();
 #if !defined(GUI)
   #define RAISE_ALERT(...)
   #define ALERT(...)
+#elif defined(COLORLCD)
+  void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound);
+  inline void RAISE_ALERT(const char * title, const char * msg, const char * info, uint8_t sound)
+  {
+    raiseAlert(title, msg, info, sound);
+  }
+  inline void ALERT(const char * title, const char * msg, uint8_t sound)
+  {
+    raiseAlert(title, msg, nullptr, sound);
+  }
 #else
   #define RAISE_ALERT(title, msg, info, sound) showAlertBox(title, msg, info, sound)
   #define ALERT(title, msg, sound) alert(title, msg, sound)
@@ -503,7 +522,7 @@ void evalLogicalSwitches(bool isCurrentFlightmode=true);
 void logicalSwitchesCopyState(uint8_t src, uint8_t dst);
 #define LS_RECURSIVE_EVALUATION_RESET()
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY) || defined(PCBFLYSKY)
   void getSwitchesPosition(bool startup);
 #else
   #define getSwitchesPosition(...)
@@ -632,14 +651,6 @@ void backlightOn();
 void checkBacklight();
 void doLoopCommonActions();
 
-#define BITMASK(bit) (1<<(bit))
-
-template<class t> inline t min(t a, t b) { return a<b?a:b; }
-template<class t> inline t max(t a, t b) { return a>b?a:b; }
-template<class t> inline t sgn(t a) { return a>0 ? 1 : (a < 0 ? -1 : 0); }
-template<class t> inline t limit(t mi, t x, t ma) { return min(max(mi,x),ma); }
-template<class t> inline void SWAP(t & a, t & b) { t tmp = b; b = a; a = tmp; }
-
 uint16_t isqrt32(uint32_t n);
 
 #if defined(BOOT)
@@ -679,6 +690,9 @@ inline int divRoundClosest(const int n, const int d)
 #define calc100to256_16Bits(x) calc100to256(x)
 #define calc100toRESX_16Bits(x) calc100toRESX(x)
 
+#define calc100to256_16Bits(x) calc100to256(x)
+#define calc100toRESX_16Bits(x) calc100toRESX(x)
+
 inline int calc100to256(int x)
 {
   return divRoundClosest(x*256, 100);
@@ -703,7 +717,6 @@ inline int calcRESXto100(int x)
 {
   return divRoundClosest(x*100, RESX);
 }
-
 
 #if defined(COLORLCD)
 extern const char vers_stamp[];
@@ -811,12 +824,9 @@ enum BaseCurves {
   CURVE_BASE
 };
 int8_t * curveAddress(uint8_t idx);
-struct point_t
-{
-  coord_t x;
-  coord_t y;
-};
+
 point_t getPoint(uint8_t i);
+point_t getPoint(uint8_t curveIndex, uint8_t index);
 typedef CurveData CurveInfo;
 void loadCurves();
 #define LOAD_MODEL_CURVES() loadCurves()
@@ -987,7 +997,7 @@ enum AUDIO_SOUNDS {
   AU_STICK2_MIDDLE,
   AU_STICK3_MIDDLE,
   AU_STICK4_MIDDLE,
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
   AU_POT1_MIDDLE,
   AU_POT2_MIDDLE,
 #if defined(PCBX9E)
@@ -1144,7 +1154,7 @@ union ReusableBuffer
     int16_t loVals[NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_MOUSE_ANALOGS];
     int16_t hiVals[NUM_STICKS+NUM_POTS+NUM_SLIDERS+NUM_MOUSE_ANALOGS];
     uint8_t state;
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
     struct {
       uint8_t stepsCount;
       int16_t steps[XPOTS_MULTIPOS_COUNT];
@@ -1164,6 +1174,13 @@ union ReusableBuffer
     OtaUpdateInformation otaUpdateInformation;
     char otaReceiverVersion[sizeof(TR_CURRENT_VERSION) + 12];
   } sdManager;
+#endif
+
+#if defined(STM32)
+  struct
+  {
+    char id[27];
+  } version;
 #endif
 
   struct {
@@ -1377,5 +1394,7 @@ inline bool isSimu()
 #if defined(DEBUG_LATENCY)
 extern uint8_t latencyToggleSwitch;
 #endif
+
+#include "module.h"
 
 #endif // _OPENTX_H_

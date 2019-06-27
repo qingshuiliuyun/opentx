@@ -55,7 +55,7 @@
   #define NOBACKUP(...)                __VA_ARGS__
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
 typedef uint16_t source_t;
 #else
 typedef uint8_t source_t;
@@ -430,12 +430,13 @@ PACK(struct ModuleData {
   };
 
   union {
-    struct {
+    uint8_t raw[PXX2_MAX_RECEIVERS_PER_MODULE * PXX2_LEN_RX_NAME + 1];
+    NOBACKUP(struct {
       int8_t  delay:6;
       uint8_t pulsePol:1;
       uint8_t outputType:1;    // false = open drain, true = push pull
       int8_t  frameLength;
-    } ppm;
+    } ppm);
     NOBACKUP(struct {
       uint8_t rfProtocolExtra:2;
       uint8_t spare1:3;
@@ -463,6 +464,13 @@ PACK(struct ModuleData {
       uint8_t receivers; // 5 bits spare
       char receiverName[PXX2_MAX_RECEIVERS_PER_MODULE][PXX2_LEN_RX_NAME];
     }) pxx2);
+#if defined(PCBFLYSKY)
+    NOBACKUP(struct {
+      uint8_t rx_id[4];
+      uint8_t mode;
+      uint8_t rx_freq[2];
+    } flysky);
+#endif
   };
 
   // Helper functions to set both of the rfProto protocol at the same time
@@ -522,9 +530,9 @@ typedef uint8_t swarnenable_t;
     swarnenable_t switchWarningEnable;
 #endif
 
-#if defined(PCBHORUS)
-#include "gui/480x272/layout.h"
-#include "gui/480x272/topbar.h"
+#if defined(COLORLCD)
+#include "gui/colorlcd/layout.h"
+#include "gui/colorlcd/topbar.h"
 #define LAYOUT_NAME_LEN 10
 PACK(struct CustomScreenData {
   char layoutName[LAYOUT_NAME_LEN];
@@ -646,10 +654,10 @@ PACK(struct TrainerData {
   NOBACKUP(TrainerMix mix[4]);
 });
 
-#if defined(PCBHORUS)
+#if defined(COLORLCD)
   #define SPLASH_MODE uint8_t splashSpares:3
 #else
-  #define SPLASH_MODE int8_t splashMode:3
+  #define SPLASH_MODE uint8_t splashMode:1; uint8_t splashSpare:2
 #endif
 
 #if defined(PCBXLITES) || defined(PCBHORUS)
@@ -660,7 +668,7 @@ PACK(struct TrainerData {
   #define GYRO_FIELDS
 #endif
 
-#if defined(PCBHORUS)
+#if defined(PCBHORUS) || defined(PCBNV14)
   #define EXTRA_GENERAL_FIELDS \
     NOBACKUP(uint8_t auxSerialMode); \
     uint32_t switchConfig; \
@@ -672,7 +680,7 @@ PACK(struct TrainerData {
     NOBACKUP(uint8_t spare:1); \
     NOBACKUP(uint8_t blOffBright:7); \
     NOBACKUP(char bluetoothName[LEN_BLUETOOTH_NAME]);
-#elif defined(PCBTARANIS)
+#elif defined(PCBTARANIS) || defined(PCBNV14)
   #if defined(BLUETOOTH)
     #define BLUETOOTH_FIELDS \
       uint8_t spare; \
@@ -706,8 +714,8 @@ PACK(struct TrainerData {
   #define EXTRA_GENERAL_FIELDS
 #endif
 
-#if defined(PCBHORUS)
-  #include "gui/480x272/theme.h"
+#if defined(COLORLCD)
+  #include "theme.h"
   #define THEME_NAME_LEN 8
   #define THEME_DATA \
     NOBACKUP(char themeName[THEME_NAME_LEN]); \
@@ -867,6 +875,8 @@ static inline void check_struct()
   CHKSIZE(CurveData, 4);
   CHKSIZE(CustomScreenData, 610);
   CHKSIZE(Topbar::PersistentData, 216);
+#elif defined(PCBNV14)
+  // TODO
 #elif defined(PCBSKY9X)
   CHKSIZE(MixData, 20);
   CHKSIZE(ExpoData, 17);

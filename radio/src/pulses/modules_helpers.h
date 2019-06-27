@@ -63,6 +63,17 @@ inline bool isModuleXJTVariant(uint8_t idx)
   return g_model.moduleData[idx].type == MODULE_TYPE_XJT_PXX1 || g_model.moduleData[idx].type == MODULE_TYPE_ISRM_PXX2;
 }
 
+#if defined(PCBFLYSKY)
+inline bool isModuleFlysky(uint8_t idx)
+{
+  return g_model.moduleData[idx].type == MODULE_TYPE_FLYSKY;
+}
+#else
+inline bool isModuleFlysky(uint8_t idx)
+{
+  return idx == EXTERNAL_MODULE && g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_FLYSKY;
+}
+#endif
 
 #if defined(CROSSFIRE)
 inline bool isModuleCrossfire(uint8_t idx)
@@ -186,8 +197,8 @@ inline bool isModuleSBUS(uint8_t idx)
 #endif
 
 // order is the same as in enum Protocols in myeeprom.h (none, ppm, pxx, pxx2, dsm, crossfire, multi, r9m, r9m2, sbus)
-static const int8_t maxChannelsModules[] = { 0, 8, 8, 16, -2, 8, 4, 8, 16, 8}; // relative to 8!
-static const int8_t maxChannelsXJT[] = { 0, 8, 0, 4 }; // relative to 8!
+static const int8_t maxChannelsModules_M8[] = { 0, 8, 8, 16, -2, 8, 4, 8, 16, 8}; // relative to 8!
+static const int8_t maxChannelsXJT_M8[] = { 0, 8, 0, 4 }; // relative to 8!
 
 constexpr int8_t MAX_TRAINER_CHANNELS_M8 = MAX_TRAINER_CHANNELS - 8;
 constexpr int8_t MAX_EXTRA_MODULE_CHANNELS_M8 = 8; // only 16ch PPM
@@ -197,9 +208,22 @@ inline int8_t maxModuleChannels_M8(uint8_t idx)
   if (isExtraModule(idx))
     return MAX_EXTRA_MODULE_CHANNELS_M8;
   else if (isModuleXJT(idx))
-    return maxChannelsXJT[1 + g_model.moduleData[idx].rfProtocol];
+    return maxChannelsXJT_M8[1 + g_model.moduleData[idx].rfProtocol];
   else
-    return maxChannelsModules[g_model.moduleData[idx].type];
+    return maxChannelsModules_M8[g_model.moduleData[idx].type];
+}
+
+inline int8_t maxModuleChannels(uint8_t idx)
+{
+  return 8 + maxModuleChannels_M8(idx);
+}
+
+inline int8_t minModuleChannels(uint8_t idx)
+{
+  if (isModuleCrossfire(idx))
+    return 16;
+  else
+    return 1;
 }
 
 inline int8_t defaultModuleChannels_M8(uint8_t idx)
@@ -212,6 +236,8 @@ inline int8_t defaultModuleChannels_M8(uint8_t idx)
     return -1; // 7 channels
   else if (isModulePXX2(idx))
     return 8; // 16 channels
+  else if (isModuleFlysky(idx))
+    return 6; // 14 channels
   else
     return maxModuleChannels_M8(idx);
 }
@@ -325,6 +351,31 @@ inline bool isReceiverOptionAvailable(uint8_t modelId, uint8_t option)
 inline bool isDefaultModelRegistrationID()
 {
   return memcmp(g_model.modelRegistrationID, g_eeGeneral.ownerRegistrationID, PXX2_LEN_REGISTRATION_ID) == 0;
+}
+
+inline bool isModuleNeedingReceiverNumber(uint8_t idx)
+{
+  return isModulePXX(idx) || isModulePXX2(idx) || isModuleDSM2(idx) || isModuleMultimodule(idx);
+}
+
+inline bool isModuleNeedingBindRangeButtons(uint8_t idx)
+{
+  return isModulePXX(idx) || isModuleDSM2(idx) || isModuleMultimodule(idx) || isModuleFlysky(idx);
+}
+
+inline bool isModuleNeedingRegisterRangeButtons(uint8_t idx)
+{
+  return isModulePXX2(idx);
+}
+
+inline bool isModuleNeedingRangeButton(uint8_t idx)
+{
+  return isModulePXX2(idx) || isModulePXX(idx) || isModuleDSM2(idx) || isModuleMultimodule(idx) || isModuleFlysky(idx);
+}
+
+inline bool isModuleNeedingFailsafeButton(uint8_t idx)
+{
+  return isModulePXX(idx) || isModulePXX2(idx) || isModuleR9M(idx) || isModuleFlysky(idx);
 }
 
 #endif // _MODULES_H_

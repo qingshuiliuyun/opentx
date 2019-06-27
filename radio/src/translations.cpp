@@ -93,12 +93,10 @@ ISTR(VBEEPLEN);
 ISTR(VRENCODERS);
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
 ISTR(AUX_SERIAL_MODES);
 ISTR(SWTYPES);
 ISTR(POTTYPES);
 ISTR(SLIDERTYPES);
-#endif
 
 #if defined(PCBSKY9X) && defined(REVX)
 ISTR(VOUTPUT_TYPE);
@@ -201,6 +199,7 @@ const char STR_SLAVE[] = TR_SLAVE;
 const char STR_MODESRC[] = TR_MODESRC;
 const char STR_MULTIPLIER[] = TR_MULTIPLIER;
 const char STR_CAL[] = TR_CAL;
+const char STR_CALIB_DONE[] = TR_CALIB_DONE;
 const char STR_VTRIM[] = TR_VTRIM;
 const char STR_MENUTOSTART[] = TR_MENUTOSTART;
 const char STR_SETMIDPOINT[] = TR_SETMIDPOINT;
@@ -307,6 +306,8 @@ const char STR_INSERT_AFTER[] = TR_INSERT_AFTER;
 const char STR_COPY[] = TR_COPY;
 const char STR_MOVE[] = TR_MOVE;
 const char STR_PASTE[] = TR_PASTE;
+const char STR_PASTE_BEFORE[] = TR_PASTE_BEFORE;
+const char STR_PASTE_AFTER[] = TR_PASTE_AFTER;
 const char STR_INSERT[] = TR_INSERT;
 const char STR_DELETE[] = TR_DELETE;
 const char STR_RESET_FLIGHT[] = TR_RESET_FLIGHT;
@@ -482,6 +483,8 @@ const char STR_DISABLE_ALARM[] = TR_DISABLE_ALARM;
 const char STR_TELEMETRY_TYPE[] = TR_TELEMETRY_TYPE;
 const char STR_TELEMETRY_SENSORS[] = TR_TELEMETRY_SENSORS;
 const char STR_VALUE[] = TR_VALUE;
+const char STR_REPEAT[] = TR_REPEAT;
+const char STR_ENABLE[] = TR_ENABLE;
 const char STR_TOPLCDTIMER[] = TR_TOPLCDTIMER;
 const char STR_UNIT[] = TR_UNIT;
 const char STR_TELEMETRY_NEWSENSOR[] = TR_TELEMETRY_NEWSENSOR;
@@ -584,7 +587,7 @@ const char STR_RECEIVER_OPTIONS[] = TR_RECEIVER_OPTIONS;
 const char STR_ASSIGN_SPLASH[] = TR_ASSIGN_SPLASH;
 #endif
 
-#if !defined(PCBHORUS)
+#if !defined(COLORLCD)
 const char STR_MENUWHENDONE[] = TR_MENUWHENDONE;
 #endif
 
@@ -618,7 +621,7 @@ const char STR_GYRO_OFFSET[] = TR_GYRO_OFFSET;
 const char STR_GYRO_MAX[] = TR_GYRO_MAX;
 #endif
 
-#if defined(PWM_BACKLIGHT) || defined(PCBHORUS)
+#if defined(PWM_BACKLIGHT) || defined(COLORLCD)
 const char STR_BLONBRIGHTNESS[] = TR_BLONBRIGHTNESS;
 const char STR_BLOFFBRIGHTNESS[] = TR_BLOFFBRIGHTNESS;
 #endif

@@ -19,6 +19,9 @@
  */
 
 #include "opentx.h"
+#if defined(LIBOPENUI)
+  #include "mainwindow.h"
+#endif
 
 uint8_t currentSpeakerVolume = 255;
 uint8_t requiredSpeakerVolume = 255;
@@ -53,7 +56,7 @@ void handleUsbConnection()
     if (g_eeGeneral.USBMode == USB_UNSELECTED_MODE && popupMenuItemsCount == 0) {
       POPUP_MENU_ADD_ITEM(STR_USB_JOYSTICK);
       POPUP_MENU_ADD_ITEM(STR_USB_MASS_STORAGE);
-#if defined(DEBUG)
+#if defined(USB_SERIAL)
       POPUP_MENU_ADD_ITEM(STR_USB_SERIAL);
 #endif
       POPUP_MENU_START(onUSBConnectMenu);
@@ -252,7 +255,7 @@ void guiMain(event_t evt)
 {
   bool refreshNeeded = false;
 
-#if defined(LUA)
+#if defined(LUA) && !defined(LIBOPENUI)
   uint32_t t0 = get_tmr10ms();
   static uint32_t lastLuaTime = 0;
   uint16_t interval = (lastLuaTime == 0 ? 0 : (t0 - lastLuaTime));
@@ -288,10 +291,13 @@ void guiMain(event_t evt)
   if (t0 > maxLuaDuration) {
     maxLuaDuration = t0;
   }
-#else
+#elif !defined(LIBOPENUI)
   lcdRefreshWait();   // WARNING: make sure no code above this line does any change to the LCD display buffer!
 #endif
 
+#if defined(LIBOPENUI)
+  mainWindow.run();
+#else
   if (!refreshNeeded) {
     DEBUG_TIMER_START(debugTimerMenus);
     while (1) {
@@ -362,6 +368,7 @@ void guiMain(event_t evt)
     lcdRefresh();
     DEBUG_TIMER_STOP(debugTimerLcdRefresh);
   }
+#endif
 }
 #elif defined(GUI)
 
@@ -489,7 +496,9 @@ void perMain()
 
   doLoopCommonActions();
 
+#if !defined(LIBOPENUI)
   event_t evt = getEvent(false);
+#endif
 
 #if defined(RAMBACKUP)
   if (unexpectedShutdown) {
@@ -517,17 +526,25 @@ void perMain()
 
 #if defined(STM32)
   if (usbPlugged() && getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
+#if defined(LIBOPENUI)
+    #warning "TODO USB plugged view"
+#else
     // disable access to menus
     lcdClear();
     menuMainView(0);
     lcdRefresh();
+#endif
     return;
   }
 #endif
 
 #if defined(GUI)
   DEBUG_TIMER_START(debugTimerGuiMain);
+#if defined(LIBOPENUI)
+  guiMain(0);
+#else
   guiMain(evt);
+#endif
   DEBUG_TIMER_STOP(debugTimerGuiMain);
 #endif
 

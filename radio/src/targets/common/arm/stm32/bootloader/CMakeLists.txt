@@ -2,7 +2,7 @@
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-if(PCB STREQUAL X12S OR PCB STREQUAL X10)
+if(PCB STREQUAL X12S OR PCB STREQUAL X10 OR PCB STREQUAL NV14)
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}
     ../f4/system_stm32f4xx.c
@@ -97,16 +97,15 @@ if(NOT (PCB STREQUAL X10 OR PCB STREQUAL X12S))
     ${BOOTLOADER_SRC}
     ../../../../../targets/${TARGET_DIR}/i2c_driver.cpp
     )
+endif()
 
-  remove_definitions(-DDEBUG)
-
-else()
+if(PCB STREQUAL X10 OR PCB STREQUAL X12S OR PCB STREQUAL NV14)
   set(BOOTLOADER_SRC
     ${BOOTLOADER_SRC}
+    ../../../../../gui/libopenui/bitmapbuffer.cpp
     ../../../../../targets/${TARGET_DIR}/sdram_driver.c
     ../../../../../targets/common/arm/stm32/sdio_sd.c
     ../../../../../targets/${TARGET_DIR}/haptic_driver.cpp
-    ../../../../../gui/${GUI_DIR}/bitmapbuffer.cpp
     ../../../../../gui/${GUI_DIR}/rle.cpp
     ../../../../../syscalls.c
     )
@@ -121,6 +120,7 @@ else()
   endif()
 endif()
 
+remove_definitions(-DDEBUG)
 remove_definitions(-DDISK_CACHE)
 remove_definitions(-DLUA)
 remove_definitions(-DCLI)
@@ -130,7 +130,6 @@ add_definitions(-DBOOT)
 set(CMAKE_EXE_LINKER_FLAGS "-mcpu=${MCU} -mthumb -nostartfiles -lm -T${RADIO_SRC_DIRECTORY}/targets/${TARGET_DIR}/stm32_ramboot.ld -Wl,-Map=bootloader.map,--cref,--no-warn-mismatch,--gc-sections")
 # use smaller nano libc
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nano.specs")
-
 
 add_executable(bootloader ${BOOTLOADER_SRC})
 add_dependencies(bootloader ${BITMAPS_TARGET} firmware_translations)

@@ -38,7 +38,7 @@ void doMixerCalculations();
 extern const char * zchar2string(const char * zstring, int size);
 #define EXPECT_ZSTREQ(c_string, z_string)   EXPECT_STREQ(c_string, zchar2string(z_string, sizeof(z_string)))
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY)
 #define RADIO_RESET() \
   g_eeGeneral.switchConfig = 0x00007bff
 #else

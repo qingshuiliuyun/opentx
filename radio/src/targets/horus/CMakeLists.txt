@@ -9,12 +9,11 @@ set(HSE_VALUE 12000000)
 set(SDCARD YES)
 set(EEPROM SDCARD)
 set(HAPTIC YES)
-set(GUI_DIR 480x272)
+set(GUI_DIR colorlcd)
 set(NAVIGATION_TYPE horus)
 set(TARGET_DIR horus)
 set(LINKER_SCRIPT targets/horus/stm32f4_flash.ld)
 set(RAMBACKUP YES)
-set(LUA YES)
 set(PPM_LIMITS_SYMETRICAL YES)
 set(USB_SERIAL ON CACHE BOOL "Enable USB serial (CDC)")
 
@@ -25,6 +24,8 @@ set(SIZE_TARGET_MEM_DEFINE "MEM_SIZE_SDRAM2=8192")
 if(SPLASH STREQUAL OFF)
   message(FATAL_ERROR "Option SPLASH=OFF not supported on Horus")
 endif()
+
+add_definitions(-DPCBFRSKY)
 
 if (PCB STREQUAL X10)
   set(FLAVOUR x10)
@@ -69,7 +70,7 @@ endif()
 
 set(FIRMWARE_DEPENDENCIES ${FIRMWARE_DEPENDENCIES} ${BITMAPS_TARGET})
 
-add_definitions(-DPCBHORUS -DSTM32F429_439xx -DSDRAM -DCOLORLCD)
+add_definitions(-DPCBHORUS -DSTM32F429_439xx -DSDRAM -DCOLORLCD -DHARDWARE_KEYS)
 add_definitions(-DEEPROM_VARIANT=0 -DAUDIO -DVOICE -DRTCLOCK)
 add_definitions(-DGPS_USART_BAUDRATE=${INTERNAL_GPS_BAUDRATE})
 add_definitions(-DPWR_BUTTON_${PWR_BUTTON})
@@ -77,37 +78,6 @@ add_definitions(-DPWR_BUTTON_${PWR_BUTTON})
 if(NOT UNEXPECTED_SHUTDOWN)
   add_definitions(-DNO_UNEXPECTED_SHUTDOWN)
 endif()
-
-include_directories(${RADIO_SRC_DIRECTORY}/fonts/480x272 gui/${GUI_DIR} gui/${GUI_DIR}/layouts)
-
-file(GLOB THEMES_SRC RELATIVE ${RADIO_SRC_DIRECTORY}/gui/480x272 ${RADIO_SRC_DIRECTORY}/gui/480x272/themes/*.cpp)
-file(GLOB LAYOUTS_SRC RELATIVE ${RADIO_SRC_DIRECTORY}/gui/480x272 ${RADIO_SRC_DIRECTORY}/gui/480x272/layouts/*.cpp)
-file(GLOB WIDGETS_SRC RELATIVE ${RADIO_SRC_DIRECTORY}/gui/480x272 ${RADIO_SRC_DIRECTORY}/gui/480x272/widgets/*.cpp)
-set(GUI_SRC
-  ${GUI_SRC}
-  bitmapbuffer.cpp
-  curves.cpp
-  bitmaps.cpp
-  radio_sdmanager.cpp
-  radio_hardware.cpp
-  model_inputs.cpp
-  model_mixes.cpp
-  model_curves.cpp
-  view_channels.cpp
-  view_logical_switches.cpp
-  view_about.cpp
-  view_text.cpp
-  screens_setup.cpp
-  theme.cpp
-  topbar.cpp
-  layout.cpp
-  widget.cpp
-  menus.cpp
-  ${THEMES_SRC}
-  ${LAYOUTS_SRC}
-  ${WIDGETS_SRC}
-  rle.cpp
-  )
 
 if(DISK_CACHE)
   set(SRC ${SRC} disk_cache.cpp)
@@ -120,6 +90,16 @@ if(INTERNAL_GPS)
   message("Horus: Internal GPS enabled")
 endif()
 
+#if(PXX2)
+#  set(GUI_SRC
+#    ${GUI_SRC}
+#    radio_tools.cpp
+#    radio_power_meter.cpp
+#    radio_spectrum_analyser.cpp
+#    )
+#endif()
+
+set(AUX_SERIAL_DRIVER ../common/arm/stm32/aux_serial_driver.cpp)
 set(AUX_SERIAL_DRIVER ../common/arm/stm32/aux_serial_driver.cpp)
 
 set(GVAR_SCREEN model_gvars.cpp)

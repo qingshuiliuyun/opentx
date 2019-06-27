@@ -40,6 +40,12 @@
   extern uint8_t dsm2BindTimer;
 #endif
 
+#if defined(PCBFLYSKY)
+  #define IS_FLYSKY_PROTOCOL(protocol)       (protocol==PROTO_FLYSKY)
+#else
+  #define IS_FLYSKY_PROTOCOL(protocol)       (0)
+#endif
+
 #if defined(DSM2)
   #define IS_DSM2_PROTOCOL(protocol)         (protocol>=PROTOCOL_CHANNELS_DSM2_LP45 && protocol<=PROTOCOL_CHANNELS_DSM2_DSMX)
 #else
@@ -350,7 +356,8 @@ enum ChannelsProtocols {
   PROTOCOL_CHANNELS_CROSSFIRE,
   PROTOCOL_CHANNELS_MULTIMODULE,
   PROTOCOL_CHANNELS_SBUS,
-  PROTOCOL_CHANNELS_PXX2
+  PROTOCOL_CHANNELS_PXX2,
+  PROTOCOL_CHANNELS_FLYSKY
 };
 
 inline void stopPulses()

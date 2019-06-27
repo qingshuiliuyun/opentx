@@ -68,6 +68,16 @@ void lcdInit()
 {
 }
 
+void lcdCopy(void * dest, void * src)
+{
+
+}
+
+void lcdNextLayer()
+{
+
+}
+
 void toplcdOff()
 {
 }
